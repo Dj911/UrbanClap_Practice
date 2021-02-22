@@ -24,33 +24,40 @@ const userSchema = new mongoose.Schema({
         // validate: [validator.isStrongPassword, 'Password is not strong'],
         select: false
     },
+    role: {
+        type: String,
+        required: [true, 'Role is required'],
+        enum: ['user','vendor','admin']
+    },
     city: {
         type: String,
         required: [true, 'Please enter a City']
     },
-    bookingList: [
-        {
-            serviceName: {
-                type: String,
-                required: [true, 'Service Name is required']
-            },
-            vendorId: {
-                type: Number,
-                required: [true, 'Vendor Id is required']
-            },
-            price: {
-                type: Number,
-                required: [true, 'Price is required']
-            },
-            rating: {
-                type: Number,
-                required: [true, 'Rating is required']
-            },
-            message: {
-                type: String
+    ucWallet: {
+        type: Number
+    },
+    refLink: {
+        type: String,
+        default: "https:/testingLink"
+    },
+    refStatus:{
+        type: Boolean,
+        default: false,
+        validator: {
+            function (el) {
+                if(el === true){
+                    ucWallet += (1/Math.random())*100;
+                    return el = false;
+                }
             }
         }
-    ]
+    },
+    active: {
+        type: Boolean,
+        default: true,
+        select: false
+    }
+    
 });
 
 const User = mongoose.model('User', userSchema);

@@ -1,111 +1,43 @@
 const express = require('express');
 
-const User = require('./userModel');
-const Service = require('./serviceModel');
-const subServices = require('./Service Sub Category/subServices');
+const userController = require('./controller/userController');
+const serviceController = require('./controller/serviceController');
+const subServiceController = require('./controller/subServiceController');
+
 
 const app = express();
 const router = express.Router();
 
 app.use(express.json());
 
-app.post('/enter', async (req, res, next) => {
-    try {
-        const data = await User.create(req.body);
-        console.log(data);
-        res.status(200).json({
-            status: "Sucess",
-            data: {
-                data
-            }
-        })
-        next();
-    } catch (err) {
-        console.log(err.message);
-    }
-})
+////////////////////////////////////////////
+// USER CREATION
+app.post('/user/signup', userController.createUser);
 
-/* router.route('/services/:category')
-    .post(async (req, res, next) => {
-        try {
-            console.log('HERE: ', req.params);
-            // const data = await subServices.create(req.body);
-            // console.log(data);
-        } catch (err) {
-            console.log(err.message);
-        }
-    }) */
-
-/* app.post('/services/:category', async (req, res, next) => {
-    try {
-        const collection = req.params;
-        const data = await collection.create(req.body);
-        console.log(data);
-    } catch (err) {
-        console.log(err.message);
-    }
-}); */
-
-//SUBSERVICES
-app.post('/services/subServices/create/:id', async (req, res, next) => {
-    try {
-        const data =
-            await subServices.findByIdAndUpdate(req.params.id, { "$push": { "children": req.body } });
-        console.log('DATA: ', data);
-        // await subServices.save();
-        res.status(200).json({
-            status: "Sucess",
-            data: {
-                data
-            }
-        })
-        next();
-    } catch (err) {
-        console.log(err.message);
-    }
-});
-
-app.get('/services/subServices/:id', async (req, res, next) => {
-    try {
-        const data =
-            await subServices.findById(req.params.id).select('-__v -_id -children._id');
-        console.log('DATA: ', data);
-        res.status(200).json({
-            status: "Sucess",
-            data: {
-                data
-            }
-        })
-        next();
-    } catch (err) {
-        console.log(err.message);
-    }
-});
-
-
+////////////////////////////////////////////
 // MAIN SERVICES Routes
-app.get('/services/:id', async (req, res, next) => {
-    try {
-        // const subService = await subServices.findById(req.params.id)
-        // const data = await Service.create(req.body)
-        const ne = await Service.find().populate('subService');
-        console.log(ne);
-        next()
-    } catch (err) {
 
-    }
-})
+// Displaying The main Service by it's id
+app.get('/services/:id', serviceController.getService);
 
+// Creating Main Service in Service Collection
+app.post('/services', serviceController.createService);
+
+////////////////////////////////////////////
+//SUBSERVICE
+
+// CREATES THE SUBSERVICE ARRAY
+app.post('/services/subService/create', subServiceController.createServiceArray);
+
+// ADD SERVICE INSIDE SUBSERVICE ARRAY
+app.post('/services/subService/add/:id', subServiceController.addService);
+
+// Will get all the subservices of Main service by passing id
+app.get('/services/subService/:id', subServiceController.getArray);
+
+////////////////////////////////////////////
 
 //USERS ROUTES
-app.get('/users', async (req, res, next) => {
-    try {
-        const data = await User.find({}).select('-password')
-        console.log(data);
-        next();
-    } catch (err) {
-        console.log(err.message);
-    }
-});
+app.get('/users', userController.getUser);
 
 module.exports = app;
